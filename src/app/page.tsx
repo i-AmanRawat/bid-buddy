@@ -1,4 +1,7 @@
+import Image from "next/image";
+
 import { database } from "@/db/index";
+import { getImageUrl } from "@/utils/files";
 
 export default async function HomePage() {
   const allItems = await database?.query.items.findMany();
@@ -9,8 +12,14 @@ export default async function HomePage() {
       <div className="grid grid-cols-4 gap-8">
         {allItems?.map((item) => (
           <div className="border p-8 rounded-xl" key={item.id}>
-            {item.name}
-            Starting Price : ₹{item.startingPrice / 100}
+            <Image
+              src={getImageUrl(item.fileKey)}
+              alt={item.name}
+              width={200}
+              height={200}
+            />
+            <h2 className="text-xl font-bold">{item.name}</h2>
+            <p className="text-lg">starting price: {item.startingPrice}</p>
           </div>
         ))}
       </div>
