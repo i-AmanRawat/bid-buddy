@@ -13,17 +13,19 @@ export default function EmptyState({
   imageUrl: string;
   heading: string;
   subHeading: string;
-  link: string;
-  redirect: string;
+  link?: string;
+  redirect?: string;
 }) {
   return (
-    <div className="flex flex-col space-y-8 justify-center items-center">
+    <div className="flex flex-col space-y-6 justify-center items-center">
       <Image src={`/${imageUrl}`} width={200} height={200} alt="no such item" />
       <h2 className="text-2xl font-bold">{heading}</h2>
       <p className="text-center">{subHeading}</p>
-      <Button asChild>
-        <Link href={redirect}>{link}</Link>
-      </Button>
+      {redirect && (
+        <Button asChild>
+          <Link href={redirect}>{link}</Link>
+        </Button>
+      )}
     </div>
   );
 }

@@ -1,12 +1,16 @@
 import Image from "next/image";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { formatDistance } from "date-fns";
 
 import { database } from "@/db/index";
-import { items } from "@/db/schema";
 import EmptyState from "@/components/empty-state";
 import { getImageUrl } from "@/utils/files";
 import { formatToRupee } from "@/utils/currency";
+import { Button } from "@/components/ui/button";
+import { createBidAction } from "./actions";
+import { bids, items } from "@/db/schema";
+import { getBidsForItem } from "@/data-access/bids";
+import { getItems } from "@/data-access/items";
 
 function formatTimestamp(timestamp: Date) {
   return formatDistance(timestamp, new Date(), {
@@ -21,9 +25,7 @@ export default async function ItemPage({
 }) {
   const { itemId } = params;
 
-  const item = await database?.query.items.findFirst({
-    where: eq(items.id, parseInt(itemId)),
-  });
+  const item = await getItems(parseInt(itemId));
 
   if (!item) {
     return (
@@ -40,14 +42,8 @@ export default async function ItemPage({
     );
   }
 
-  // const bids = [
-  //   { id: 1, userName: "max", amount: "10", timestamp: Date.now() },
-  //   { id: 2, userName: "john", amount: "9000", timestamp: Date.now() },
-  //   { id: 3, userName: "andrew", amount: "99", timestamp: Date.now() },
-  //   { id: 4, userName: "josh", amount: "55", timestamp: Date.now() },
-  // ];
-  const bids: any = [];
-  const hasBids = bids.length > 0;
+  const allBids = await getBidsForItem(parseInt(itemId));
+  const hasBids = allBids.length > 0;
 
   return (
     <main className="space-y-8">
@@ -73,6 +69,13 @@ export default async function ItemPage({
             </div>
             <div className="">
               {" "}
+              Current bid price ₹
+              <span className="font-bold">
+                {formatToRupee(item.currentBid)}
+              </span>
+            </div>
+            <div className="">
+              {" "}
               Bid Interval ₹
               <span className="font-bold">
                 {formatToRupee(item.bidInterval)}
@@ -82,20 +85,30 @@ export default async function ItemPage({
         </div>
 
         <div className="right-div flex-1 space-y-4">
-          <h2 className="text-2xl font-bold">Current Bids</h2>
+          <div className="flex justify-between">
+            <h2 className="text-2xl font-bold">Current Bids</h2>
+            <form
+              action={createBidAction.bind(null, item.id)}
+              className="flex justify-center items-center space-y-6"
+            >
+              <Button>Place bid</Button>
+            </form>
+          </div>
 
           {hasBids ? (
             <ul className="space-y-4">
-              {bids.map((bid: any) => (
+              {allBids.map((bid) => (
                 <li className="bg-gray-100 p-8 rounded-xl" key={bid.id}>
                   <div className="flex gap-4">
                     <div className="">
                       <span className="font-bold">
-                        ₹{formatToRupee(bid.amount)}
+                        ₹{formatToRupee(bid.bidAmount)}
                       </span>{" "}
-                      by <span className="font-bold">{bid.userName}</span>
+                      by <span className="font-bold">{bid.users.name}</span>
                     </div>
-                    <div className="">{formatTimestamp(bid.timestamp)}</div>
+                    <div className="">
+                      {formatTimestamp(bid.bidTime as Date)}
+                    </div>
                   </div>
                 </li>
               ))}
@@ -106,9 +119,13 @@ export default async function ItemPage({
                 imageUrl="no_data.svg"
                 heading="No bids yet!"
                 subHeading="Be the first to start bidding."
-                link="Place bid"
-                redirect="/"
               />
+              <form
+                action={createBidAction.bind(null, item.id)}
+                className="flex justify-center items-center space-y-6"
+              >
+                <Button>Place bid</Button>
+              </form>
             </div>
           )}
         </div>

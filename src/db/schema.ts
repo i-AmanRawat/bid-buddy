@@ -8,6 +8,7 @@ import {
   serial,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
+import { relations } from "drizzle-orm";
 
 // export const users = pgTable("users", {
 //   id: serial("id").primaryKey(),
@@ -17,14 +18,6 @@ import type { AdapterAccountType } from "next-auth/adapters";
 //   role: varchar("role", { length: 50 }).default("user"), // 'user' or 'admin'
 //   created_at: timestamp("created_at").defaultNow(),
 // });
-
-export const bids = pgTable("bb_bids", {
-  id: serial("id").primaryKey(),
-  // bid_amount: integer("bid_amount").notNull(),
-  // user_id: integer("user_id").references(() => users.id),
-  // item_id: integer("item_id").references(() => items.id),
-  // bid_time: timestamp("bid_time").defaultNow(),
-});
 
 export const users = pgTable("bb_user", {
   id: text("id")
@@ -91,6 +84,7 @@ export const items = pgTable("bb_item", {
   fileKey: text("fileKey").notNull(),
   startingPrice: integer("startingPrice").notNull().default(0),
   bidInterval: integer("bidInterval").notNull().default(100),
+  currentBid: integer("currentBid").notNull().default(0),
   // title: varchar("title", { length: 255 }).notNull(),
   // description: text("description"),
   // image_url: varchar("image_url", { length: 255 }),
@@ -101,23 +95,22 @@ export const items = pgTable("bb_item", {
 });
 export type Item = typeof items.$inferSelect;
 
-// export const authenticators = pgTable(
-//   "bb_authenticator",
-//   {
-//     credentialID: text("credentialID").notNull().unique(),
-//     userId: text("userId")
-//       .notNull()
-//       .references(() => users.id, { onDelete: "cascade" }),
-//     providerAccountId: text("providerAccountId").notNull(),
-//     credentialPublicKey: text("credentialPublicKey").notNull(),
-//     counter: integer("counter").notNull(),
-//     credentialDeviceType: text("credentialDeviceType").notNull(),
-//     credentialBackedUp: boolean("credentialBackedUp").notNull(),
-//     transports: text("transports"),
-//   },
-//   (authenticator) => ({
-//     compositePK: primaryKey({
-//       columns: [authenticator.userId, authenticator.credentialID],
-//     }),
-//   })
-// );
+export const bids = pgTable("bb_bids", {
+  id: serial("id").primaryKey(),
+  bidAmount: integer("bid_amount").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  itemId: serial("item_id")
+    .notNull()
+    .references(() => items.id, { onDelete: "cascade" }),
+  bidTime: timestamp("bid_time").defaultNow(),
+  // bid_time: timestamp("bid_time", { mode: "date" }).notNull(),
+});
+
+export const bidsRelations = relations(bids, ({ one }) => ({
+  users: one(users, {
+    fields: [bids.userId],
+    references: [users.id],
+  }),
+}));

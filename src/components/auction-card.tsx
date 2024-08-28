@@ -14,7 +14,7 @@ export default function AuctionCard({
   item: Item;
 }) {
   return (
-    <div className="border p-8 rounded-xl" key={key}>
+    <div className="border p-8 rounded-xl space-y-2" key={key}>
       <Image
         src={getImageUrl(item.fileKey)}
         alt={item.name}
