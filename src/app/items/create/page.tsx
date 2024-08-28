@@ -9,7 +9,7 @@ import {
 
 export default function CreateBidPage() {
   return (
-    <main className="container mx-auto py-12 space-y-8">
+    <main className="space-y-8">
       <h1 className="text-4xl font-bold">Post an Item to Sell</h1>
       <form
         onSubmit={async (e) => {

@@ -21,13 +21,25 @@ export default async function Header() {
               height={50}
               alt="logo"
             />
-            <span>BidBuddy.com</span>
+            <span className="font-medium">BidBuddy.com</span>
           </Link>
-          <Button variant="link">
-            <Link href="/items/create" className="text-base font-normal">
-              Auction an Item
-            </Link>
-          </Button>
+          <div className="">
+            <Button variant="link">
+              <Link href="/items/create" className="text-base font-medium">
+                Create Auction
+              </Link>
+            </Button>
+            <Button variant="link">
+              <Link href="/" className="text-base font-medium">
+                All Auctions
+              </Link>
+            </Button>
+            <Button variant="link">
+              <Link href="/auctions" className="text-base font-medium">
+                My Auctions
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">

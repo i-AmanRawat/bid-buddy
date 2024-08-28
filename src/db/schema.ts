@@ -88,8 +88,9 @@ export const items = pgTable("bb_item", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  startingPrice: integer("startingPrice").notNull().default(0),
   fileKey: text("fileKey").notNull(),
+  startingPrice: integer("startingPrice").notNull().default(0),
+  bidInterval: integer("bidInterval").notNull().default(100),
   // title: varchar("title", { length: 255 }).notNull(),
   // description: text("description"),
   // image_url: varchar("image_url", { length: 255 }),
@@ -98,6 +99,7 @@ export const items = pgTable("bb_item", {
   // auction_end_time: timestamp("auction_end_time").notNull(),
   // created_at: timestamp("created_at").defaultNow(),
 });
+export type Item = typeof items.$inferSelect;
 
 // export const authenticators = pgTable(
 //   "bb_authenticator",

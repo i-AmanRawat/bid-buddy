@@ -9,8 +9,7 @@ export default function SignOut() {
     <form
       action={async () => {
         "use server";
-        await signOut();
-        redirect("/");
+        await signOut({ redirectTo: "/" });
       }}
     >
       <Button type="submit">Sign Out</Button>

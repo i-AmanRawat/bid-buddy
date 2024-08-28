@@ -1,28 +1,30 @@
-import Image from "next/image";
-
 import { database } from "@/db/index";
-import { getImageUrl } from "@/utils/files";
+import AuctionCard from "@/components/auction-card";
+import EmptyState from "@/components/empty-state";
 
 export default async function HomePage() {
   const allItems = await database?.query.items.findMany();
+  const hasItem = allItems.length > 0;
+  // const hasItem = false;
 
   return (
-    <main className="container mx-auto py-12 space-y-8">
+    <main className="space-y-8">
       <h1 className="text-4xl font-bold">Items for Sale</h1>
-      <div className="grid grid-cols-4 gap-8">
-        {allItems?.map((item) => (
-          <div className="border p-8 rounded-xl" key={item.id}>
-            <Image
-              src={getImageUrl(item.fileKey)}
-              alt={item.name}
-              width={200}
-              height={200}
-            />
-            <h2 className="text-xl font-bold">{item.name}</h2>
-            <p className="text-lg">starting price: {item.startingPrice}</p>
-          </div>
-        ))}
-      </div>
+      {hasItem ? (
+        <div className="grid grid-cols-4 gap-8">
+          {allItems?.map((item) => (
+            <AuctionCard key={item.id} item={item} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          imageUrl="no_data.svg"
+          heading="No Auction ongoing!!"
+          subHeading="Meanwhile you can add your own item for the auction."
+          link="Create your auction"
+          redirect="/items/create"
+        />
+      )}
     </main>
   );
 }
