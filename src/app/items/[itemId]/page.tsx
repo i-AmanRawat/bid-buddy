@@ -1,16 +1,14 @@
 import Image from "next/image";
-import { desc, eq } from "drizzle-orm";
 import { formatDistance } from "date-fns";
 
-import { database } from "@/db/index";
 import EmptyState from "@/components/empty-state";
 import { getImageUrl } from "@/utils/files";
 import { formatToRupee } from "@/utils/currency";
 import { Button } from "@/components/ui/button";
 import { createBidAction } from "./actions";
-import { bids, items } from "@/db/schema";
 import { getBidsForItem } from "@/data-access/bids";
 import { getItems } from "@/data-access/items";
+import { auth } from "@/auth";
 
 function formatTimestamp(timestamp: Date) {
   return formatDistance(timestamp, new Date(), {
@@ -26,6 +24,8 @@ export default async function ItemPage({
   const { itemId } = params;
 
   const item = await getItems(parseInt(itemId));
+
+  const session = await auth();
 
   if (!item) {
     return (
@@ -44,6 +44,7 @@ export default async function ItemPage({
 
   const allBids = await getBidsForItem(parseInt(itemId));
   const hasBids = allBids.length > 0;
+  const canPlaceBid = session && item.userId !== session?.user.id;
 
   return (
     <main className="space-y-8">
@@ -87,12 +88,14 @@ export default async function ItemPage({
         <div className="right-div flex-1 space-y-4">
           <div className="flex justify-between">
             <h2 className="text-2xl font-bold">Current Bids</h2>
-            <form
-              action={createBidAction.bind(null, item.id)}
-              className="flex justify-center items-center space-y-6"
-            >
-              <Button>Place bid</Button>
-            </form>
+            {canPlaceBid && (
+              <form
+                action={createBidAction.bind(null, item.id)}
+                className="flex justify-center items-center space-y-6"
+              >
+                <Button>Place bid</Button>
+              </form>
+            )}
           </div>
 
           {hasBids ? (
@@ -120,12 +123,14 @@ export default async function ItemPage({
                 heading="No bids yet!"
                 subHeading="Be the first to start bidding."
               />
-              <form
-                action={createBidAction.bind(null, item.id)}
-                className="flex justify-center items-center space-y-6"
-              >
-                <Button>Place bid</Button>
-              </form>
+              {canPlaceBid && (
+                <form
+                  action={createBidAction.bind(null, item.id)}
+                  className="flex justify-center items-center space-y-6"
+                >
+                  <Button>Place bid</Button>
+                </form>
+              )}
             </div>
           )}
         </div>
